@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalizacionPlan</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #447747;
+            color: #ffffff;
+        }
+
+        /* Custom container and theme background */
+        .container-fluid {
+            width: 100%;
+            height: 100%;
+            background-image: repeating-radial-gradient(#578a55 80%, #546654 90%, #204228 90%);
+            background-size: 65px 65px;
+            padding: 40px;
+        }
+
+        /* Custom card-like container for login-form style */
+        .login-container {
+            background-color: #3b5a44;
+            border-radius: 8px;
+            box-shadow: rgb(31 31 31 / 17%) 0px -23px 25px 0px inset,
+                        rgb(108 108 108 / 23%) 0px -36px 30px 0px inset,
+                        rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset,
+                        rgba(0, 0, 0, 0.06) 0px 2px 1px,
+                        rgba(0, 0, 0, 0.09) 0px 4px 2px,
+                        rgba(0, 0, 0, 0.09) 0px 8px 4px,
+                        rgba(0, 0, 0, 0.09) 0px 16px 8px,
+                        rgba(0, 0, 0, 0.09) 0px 32px 16px;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .heading {
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        /* Styling DataTables */
+        .dataTables_wrapper {
+            background-color: #2f2f2f;
+            color: #ffffff;
+        }
+
+        table.dataTable {
+            border-color: #117b44;
+        }
+
+        table.dataTable thead th {
+            background-color: #136526;
+            color: #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        table.dataTable tbody tr {
+            background-color: #353535;
+            color: #ffffff;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #202c3e;
+            color: #ffffff;
+        }
+
+        /* Custom styling for the map container */
+        .map-container {
+            height: 500px;
+            margin-bottom: 20px;
+            background-color: #353535;
+            border-radius: 8px;
+            box-shadow: rgb(31 31 31 / 17%) 0px -23px 25px 0px inset,
+                        rgb(108 108 108 / 23%) 0px -36px 30px 0px inset,
+                        rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset;
+        }
+
+        /* Responsive map */
+        @media (max-width: 768px) {
+            .map-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .map-container {
+                height: 250px;
+            }
+        }
+
+        /* Ensure InfoWindow text is visible */
+        .info-window-content {
+            color: #000000; /* Black text color for InfoWindow */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="login-container">
+            <h1 class="heading">Monitor-Censo-Campo</h1>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div id="map" class="map-container"></div>
+                </div>
+            </div>
+
+            <!-- Navigation for buckets -->
+            <ul class="nav nav-pills my-4" id="bucketTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="dig1-tab" data-toggle="pill" href="#dig1" role="tab" >DIG1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="dig2-tab" data-toggle="pill" href="#dig2" role="tab">DIG2</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="dig3-tab" data-toggle="pill" href="#dig3" role="tab">DIG3</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="dig4-tab" data-toggle="pill" href="#dig4" role="tab">DIG4</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" id="cam5-tab" data-toggle="pill" href="#cam5" role="tab">CAM5</a>
+                </li> -->
+            </ul>
+
+            <!-- DataTables for each CAM bucket -->
+            <div class="tab-content">
+                <div class="tab-pane fade show active table-section" id="dig1" role="tabpanel">
+                    <table id="dig1Table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Equipo</th>
+                                <th>Comentario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Latitud</th>
+                                <th>Longitud</th>
+                                
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane fade table-section" id="dig2" role="tabpanel">
+                    <table id="dig2Table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Equipo</th>
+                                <th>Comentario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Latitud</th>
+                                <th>Longitud</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane fade table-section" id="dig3" role="tabpanel">
+                    <table id="dig3Table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Equipo</th>
+                                <th>Comentario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Latitud</th>
+                                <th>Longitud</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane fade table-section" id="dig4" role="tabpanel">
+                    <table id="dig4Table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Equipo</th>
+                                <th>Comentario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Latitud</th>
+                                <th>Longitud</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- <div class="tab-pane fade table-section" id="cam5" role="tabpanel">
+                    <table id="cam5Table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Equipo</th>
+                                <th>COmentario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Latitud</th>
+                                <th>Longitud</th>
+                                
+                            </tr>
+                        </thead>
+                    </table>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK v8 (Global) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- Google Maps API with async loading -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvhXkpjn3NIKaTnuL3X_W-IMty4urq2MA"></script>
+
+    <!-- Bootstrap and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase Initialization and Real-Time Data -->
+    <script>
+        let map;
+        let bucketMarkers = {};  // To keep track of markers for each bucket
+
+        window.onload = function() {
+            // Firebase configuration
+            var firebaseConfig = {
+                apiKey: "AIzaSyAEEmpYZpG_YElJNXRPRYrLcnBHD6kQACk",
+                authDomain: "ecnv1-a8573.firebaseapp.com",
+                databaseURL: "https://ecnv1-a8573.firebaseio.com",
+                projectId: "ecnv1-a8573",
+                storageBucket: "ecnv1-a8573.firebasestorage.app",
+                messagingSenderId: "202608859524",
+                appId: "1:202608859524:web:0052c944b501fca68e65d1",
+                measurementId: "G-E2CGH3ESV8"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            // Reference to the database
+            var db = firebase.database();
+
+            // Function to capitalize the first letter of each word
+            function capitalizeWords(str) {
+                return str.toLowerCase().replace(/\b\w/g, function (c) {
+                    return c.toUpperCase();
+                });
+            }
+
+            // Initialize Google Map with a lighter blue color
+            function initMap() {
+                var mapOptions = {
+    center: { lat: 25.6866, lng: -100.3161 }, // Example coordinates (Monterrey)
+    zoom: 12,
+    styles: [
+        {
+            "featureType": "water",
+            "elementType": "geometry",
+            "stylers": [
+                { "color": "#a4d8e1" }  // Soft teal for water
+            ]
+        },
+        {
+            "featureType": "landscape",
+            "elementType": "geometry",
+            "stylers": [
+                { "color": "#d0e8d0" }  // Light green for landscape
+            ]
+        },
+        {
+            "featureType": "road",
+            "elementType": "geometry",
+            "stylers": [
+                { "color": "#4a6e4a" }  // Muted green for roads
+            ]
+        },
+        {
+            "featureType": "poi",
+            "elementType": "geometry",
+            "stylers": [
+                { "color": "#6b8e23" }  // Olive green for points of interest
+            ]
+        },
+        {
+            "elementType": "labels.text.fill",
+            "stylers": [
+                { "color": "#333333" }  // Dark gray text for labels
+            ]
+        },
+        {
+            "elementType": "labels.text.stroke",
+            "stylers": [
+                { "color": "#ffffff" }  // White text stroke for better contrast
+            ]
+        }
+    ]
+};
+
+    map = new google.maps.Map(document.getElementById("map"), mapOptions);
+}
+
+
+            // Function to add data from Firebase to the table and map
+            function populateTableAndMap(bucket, iconUrl) {
+                const bucketRef = db.ref(bucket);
+                const table = $(`#${bucket.toLowerCase()}Table`).DataTable();
+                const currentMarkers = [];  // Markers for this specific bucket
+
+                const infoWindow = new google.maps.InfoWindow();  // Create an InfoWindow
+
+                bucketRef.on('value', (snapshot) => {
+                    var data = snapshot.val();
+                    table.clear(); // Clear the table before adding new data
+
+                    // Remove existing markers for this bucket
+                    if (bucketMarkers[bucket]) {
+                        bucketMarkers[bucket].forEach(marker => marker.setMap(null));
+                    }
+
+                    for (var key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            var job = data[key];
+
+                            // Add default values if any of the fields are missing or invalid
+                            var num = job.num || "N/A";
+                            var equipo = capitalizeWords(job.equipo || "N/A");
+                            var comentario = capitalizeWords(job.comentario || "N/A");   
+                            var fecha_hora = job.fecha_hora || "N/A";
+                            var latitud = (job.latitud !== "0") ? job.latitud : null;
+                            var longitud = (job.longitud !== "0") ? job.longitud : null;
+                            
+
+                            // Add job data to DataTable
+                            table.row.add([
+                                num, 
+                                equipo,
+                                comentario, 
+                                fecha_hora, 
+                                latitud || "Not available", 
+                                longitud || "Not available", 
+                               
+                            ]);
+
+                            // Add marker to map if valid coordinates are available
+                            if (latitud && longitud) {
+                                var marker = new google.maps.Marker({
+                                    position: { lat: parseFloat(latitud), lng: parseFloat(longitud) },
+                                    map: map,
+                                    title: `${bucket} - ${comentario}`,
+                                    icon: {
+                                        url: iconUrl,  // Use the custom icon for this bucket
+                                        scaledSize: new google.maps.Size(34, 34)  // Set size to 24x24
+                                    }
+                                });
+                                currentMarkers.push(marker);  // Keep track of markers
+
+                                // Add click listener for InfoWindow
+                                google.maps.event.addListener(marker, 'click', (function(marker, job) {
+                                    return function() {
+                                        // Set the content for InfoWindow with custom styles
+                                        const content = `
+                                            <div class="info-window-content">
+                                                <strong>${capitalizeWords(bucket)}</strong><br>
+                                                <strong>No:</strong> ${job.num}<br>
+                                                <strong>Equipo:</strong> ${capitalizeWords(job.equipo)}<br>
+                                                <strong>Comentario:</strong> ${capitalizeWords(job.comentario)}<br>
+                                                <strong>Fecha y Hora:</strong> ${job.fecha_hora}<br>
+                                                
+                                            </div>
+                                        `;
+                                        infoWindow.setContent(content);
+                                        infoWindow.open(map, marker);  // Show InfoWindow
+                                    };
+                                })(marker, job));
+                            }
+                        }
+                    }
+
+                    // Save the current markers for this bucket
+                    bucketMarkers[bucket] = currentMarkers;
+
+                    table.draw(); // Refresh the table with new data
+                });
+            }
+
+            // Call initMap after page load
+            initMap();
+
+            // Populate tables and maps for each CAM bucket with different PNG icons and sizes
+            populateTableAndMap('DIG1', 'pole80_yellow.png');  // PNG icon for CAM1
+            populateTableAndMap('DIG2', 'pole80_red.png');  // PNG icon for CAM2
+            populateTableAndMap('DIG3', 'pole80_blue.png');  // PNG icon for CAM3
+            populateTableAndMap('DIG4', 'pole80_green.png');  // PNG icon for CAM4
+            //populateTableAndMap('CAM5', 'cam_green.png');  // PNG icon for CAM5
+        };
+    </script>
+</body>
+</html>
