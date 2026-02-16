@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>DigitalizacionPlan | Monitor Censo Campo</title>
+
+  <!-- Bootstrap 4 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <!-- DataTables (Bootstrap4) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" />
+
+  <style>
+    :root{
+      --bg0:#071014;
+      --bg1:#0b1b1f;
+      --card:#0e2429;
+      --card2:#0b1f24;
+      --muted:#9bb2bb;
+      --text:#e7f0f3;
+      --accent:#36d6c4;
+      --accent2:#4aa3ff;
+      --danger:#ff4d5a;
+      --shadow: 0 20px 50px rgba(0,0,0,.45);
+      --border: rgba(255,255,255,.08);
+    }
+
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(54,214,196,.18), transparent 55%),
+        radial-gradient(900px 600px at 85% 20%, rgba(74,163,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(255,77,90,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color: var(--text);
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
+    }
+
+    .page-wrap{
+      min-height:100%;
+      padding: 28px 18px 38px;
+    }
+
+    .app-shell{
+      max-width: 1250px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .app-header{
+      padding: 18px 22px;
+      background: linear-gradient(90deg, rgba(54,214,196,.10), rgba(74,163,255,.10));
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .brand-badge{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(54,214,196,.25), rgba(74,163,255,.25));
+      border: 1px solid var(--border);
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+      flex: 0 0 auto;
+    }
+    .brand-badge span{
+      font-weight: 800;
+      letter-spacing: .5px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .brand small{
+      display:block;
+      color: var(--muted);
+      margin-top: 2px;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .header-right{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .pill{
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .dot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(54,214,196,.12);
+    }
+
+    /* Map */
+    .map-wrap{
+      padding: 18px 18px 0;
+      background: rgba(0,0,0,.10);
+    }
+    .map-container{
+      height: 520px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 35px rgba(0,0,0,.45);
+      overflow:hidden;
+    }
+    @media (max-width: 992px){ .map-container{ height: 420px; } }
+    @media (max-width: 576px){ .map-container{ height: 320px; } }
+
+    /* Tabs */
+    .tabs-wrap{
+      padding: 14px 18px 0;
+    }
+    .nav-pills .nav-link{
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+      margin: 6px 8px 6px 0;
+      font-weight: 700;
+      letter-spacing: .2px;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .nav-pills .nav-link:hover{
+      transform: translateY(-1px);
+      border-color: rgba(54,214,196,.35);
+      background: rgba(54,214,196,.08);
+      color: var(--text);
+    }
+    .nav-pills .nav-link.active{
+      background: linear-gradient(135deg, rgba(54,214,196,.28), rgba(74,163,255,.22));
+      border-color: rgba(54,214,196,.45);
+      color: var(--text);
+      box-shadow: 0 12px 25px rgba(0,0,0,.35);
+    }
+
+    /* Table section */
+    .tables-wrap{
+      padding: 14px 18px 22px;
+    }
+    .table-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.10));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 14px 10px;
+      box-shadow: 0 16px 35px rgba(0,0,0,.35);
+    }
+
+    /* DataTables + Bootstrap4 overrides */
+    .dataTables_wrapper{
+      color: var(--text);
+    }
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label{
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select{
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      padding: 6px 10px;
+      height: auto;
+    }
+    table.dataTable{
+      border-collapse: separate !important;
+      border-spacing: 0 10px !important;
+    }
+    table.dataTable thead th{
+      background: rgba(54,214,196,.12);
+      border: 1px solid var(--border) !important;
+      color: var(--text);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      padding: 12px 12px !important;
+    }
+    table.dataTable tbody tr{
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+    table.dataTable tbody td{
+      border-top: none !important;
+      padding: 12px 12px !important;
+      color: var(--text);
+    }
+    table.dataTable tbody tr:hover{
+      background: rgba(74,163,255,.08);
+    }
+    .page-item.active .page-link{
+      background-color: rgba(54,214,196,.25) !important;
+      border-color: rgba(54,214,196,.45) !important;
+      color: var(--text) !important;
+    }
+    .page-link{
+      background: rgba(0,0,0,.18) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--muted) !important;
+      border-radius: 10px;
+      margin: 0 3px;
+    }
+
+    /* Modern InfoWindow */
+    .gm-style .gm-style-iw-c{
+      padding: 0 !important;
+      border-radius: 14px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .gm-style .gm-style-iw-d{
+      overflow: hidden !important;
+    }
+    .iw-card{
+      width: 280px;
+      background: rgba(10, 24, 28, .95);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.55);
+      overflow: hidden;
+    }
+    .iw-top{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(135deg, rgba(54,214,196,.22), rgba(74,163,255,.18));
+    }
+    .iw-title{
+      margin:0;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: .4px;
+    }
+    .iw-sub{
+      margin: 2px 0 0;
+      color: rgba(231,240,243,.78);
+      font-size: 12px;
+    }
+    .iw-body{
+      padding: 10px 12px 12px;
+    }
+    .iw-row{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(255,255,255,.10);
+    }
+    .iw-row:last-child{ border-bottom: none; }
+    .iw-k{
+      color: rgba(155,178,187,.85);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .iw-v{
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+    .iw-badge{
+      display:inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-size: 11px;
+      color: rgba(231,240,243,.85);
+      margin-top: 8px;
+    }
+  
+    .tab-count{
+      margin-left:.5rem;
+      padding:.15rem .45rem;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.78rem;
+      color:#0b2239;
+      background:rgba(255,255,255,.75);
+      border:1px solid rgba(15,23,42,.12);
+    }
+    .filters-wrap{ margin: 12px 0 16px; }
+    .filters-card{
+      display:flex; gap:14px; align-items:stretch; justify-content:space-between;
+      padding:12px 12px;
+      background: rgba(255,255,255,.86);
+      border:1px solid rgba(15,23,42,.12);
+      border-radius:16px;
+      box-shadow: 0 10px 28px rgba(15,23,42,.08);
+      backdrop-filter: blur(8px);
+    }
+    .filters-left{ display:flex; align-items:center; gap:12px; min-width:260px; }
+    .kpi-label{ font-size:.78rem; color: rgba(11,34,57,.7); font-weight:700; }
+    .kpi-value{ font-size:1.05rem; font-weight:800; color:#0b2239; line-height:1.1; }
+    .kpi-sub{ font-size:.78rem; color: rgba(11,34,57,.75); }
+    .filters-right{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; justify-content:flex-end; }
+    .filter-item label{ font-size:.72rem; font-weight:800; color: rgba(11,34,57,.75); margin:0 0 4px; }
+    .filters-hint{ margin-top:8px; font-size:.85rem; color: rgba(11,34,57,.8); }
+    .btn-neo{ border-radius:12px; font-weight:800; }
+    .btn-primary.btn-neo{ box-shadow: 0 10px 18px rgba(13,110,253,.18); }
+    .btn-outline-secondary.btn-neo{ border-color: rgba(15,23,42,.2); }
+    .go-btn{
+      padding:.28rem .55rem;
+      border-radius:10px;
+      border:1px solid rgba(13,110,253,.25);
+      background: rgba(13,110,253,.08);
+      color:#0b5ed7;
+      font-weight:800;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .go-btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 18px rgba(15,23,42,.10); background: rgba(13,110,253,.12); }
+    tr.row-active{
+      outline: 2px solid rgba(13,110,253,.35);
+      outline-offset: -2px;
+      background: rgba(13,110,253,.06) !important;
+    }
+</style>
+</head>
+
+<body>
+  <div class="page-wrap">
+    <div class="app-shell">
+      <div class="app-header">
+        <div class="brand">
+          <div class="brand-badge"><span>DIG</span></div>
+          <div style="min-width:0">
+            <h1>Monitor Censo Campo</h1>
+            <small>Firebase + Google Maps · Buckets DIG1–DIG6</small>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="pill"><span class="dot"></span><span>Tiempo real</span></div>
+          <div class="pill">UI v2</div>
+        </div>
+      </div>
+
+      <div class="map-wrap">
+        <div id="map" class="map-container"></div>
+      </div>
+
+      <div class="tabs-wrap">
+        <ul class="nav nav-pills" id="bucketTabs" role="tablist">
+          <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#dig1" role="tab">DIG1 <span class="tab-count" id="count-dig1">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig2_pte" role="tab">DIG2_PTE <span class="tab-count" id="count-dig2_pte">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig3" role="tab">DIG3 <span class="tab-count" id="count-dig3">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig4" role="tab">DIG4 <span class="tab-count" id="count-dig4">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig5" role="tab">DIG5 <span class="tab-count" id="count-dig5">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig6" role="tab">DIG6 <span class="tab-count" id="count-dig6">0</span></a></li>
+        </ul>
+      
+      <div class="filters-wrap">
+        <div class="filters-card">
+          <div class="filters-left">
+            <div class="kpi">
+              <div class="kpi-label">Último punto capturado</div>
+              <div class="kpi-value" id="lastPoint">—</div>
+              <div class="kpi-sub" id="lastPointMeta">—</div>
+            </div>
+          </div>
+          <div class="filters-right">
+            <div class="filter-item">
+              <label>Desde</label>
+              <input type="date" id="filterFrom" class="form-control form-control-sm" />
+            </div>
+            <div class="filter-item">
+              <label>Hasta</label>
+              <input type="date" id="filterTo" class="form-control form-control-sm" />
+            </div>
+            <div class="filter-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-sm btn-primary btn-neo" id="btnApplyFilter">Aplicar</button>
+            </div>
+            <div class="filter-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-sm btn-outline-secondary btn-neo" id="btnClearFilter">Limpiar</button>
+            </div>
+            <div class="filter-item">
+  <label>&nbsp;</label>
+  <button class="btn btn-sm btn-success btn-neo" id="btnExportCSV">CSV</button>
+</div>
+          </div>
+        </div>
+        <div class="filters-hint" id="filterHint">Mostrando: <b id="shownCount">0</b> registros del bucket activo.</div>
+      </div>
+
+</div>
+
+      <div class="tables-wrap">
+        <div class="table-card">
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="dig1" role="tabpanel">
+              <table id="dig1Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="dig2_pte" role="tabpanel">
+              <table id="dig2_pteTable" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="dig3" role="tabpanel">
+              <table id="dig3Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="dig4" role="tabpanel">
+              <table id="dig4Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="dig5" role="tabpanel">
+              <table id="dig5Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="dig6" role="tabpanel">
+              <table id="dig6Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Google Maps -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvhXkpjn3NIKaTnuL3X_W-IMty4urq2MA"></script>
+
+  <!-- jQuery (FULL, no slim) + DataTables + Bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let map;
+    const bucketMarkers = {}; // markers por bucket
+    const tableInstances = {}; // DataTables por bucket
+    const infoWindow = new google.maps.InfoWindow();
+    const markerIndex = {}; // markerIndex[bucket][key] = marker
+    let activeBucket = "DIG1";
+    let filterFrom = null; // Date
+    let filterTo = null;   // Date (end of day)
+    let lastPointGlobal = { bucket: null, fecha: null, key: null, job: null };
+
+    // Helpers
+    function safeId(bucket){
+      return String(bucket).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    }
+    function cleanVal(v){
+      if (v === null || v === undefined) return "";
+      let s = String(v);
+      // quita comillas dobles o simples envolventes (y espacios raros)
+      s = s.trim();
+      // casos como: ""PC""  o  "PC"
+      s = s.replace(/^"+|"+$/g, "");
+      s = s.replace(/^'+|'+$/g, "");
+      // si quedaron dobles dobles por datos sucios
+      s = s.replace(/^"+|"+$/g, "");
+      return s.trim();
+    }
+
+    function parseFechaToDate(str){
+      const s = cleanVal(str);
+      if(!s) return null;
+      // soporta "YYYY-MM-DD HH:mm:ss" o ISO
+      const iso = s.includes("T") ? s : s.replace(" ", "T");
+      const d = new Date(iso);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    function getFecha(job){
+      return job.fecha_hora || job.fecha || job.timestamp || job.time || job.datetime || "";
+    }
+    function inRange(d){
+      if(!d) return false;
+      if(filterFrom && d < filterFrom) return false;
+      if(filterTo && d > filterTo) return false;
+      return true;
+    }
+    function setTabCount(bucket, count){
+      const el = document.getElementById("count-" + safeId(bucket));
+      if(el) el.textContent = count;
+    }
+    function setLastPointUI(){
+      const el = document.getElementById("lastPoint");
+      const meta = document.getElementById("lastPointMeta");
+      if(!el || !meta) return;
+      if(!lastPointGlobal.fecha){
+        el.textContent = "—";
+        meta.textContent = "—";
+        return;
+      }
+      el.textContent = cleanVal(lastPointGlobal.fecha);
+      meta.textContent = `${lastPointGlobal.bucket} · Equipo: ${capitalizeWords(lastPointGlobal.job?.equipo)} · #${cleanVal(lastPointGlobal.job?.num) || "N/A"}`;
+    }
+    function setShownCount(n){
+      const el = document.getElementById("shownCount");
+      if(el) el.textContent = n;
+    }
+
+    function capitalizeWords(str){
+      const s = cleanVal(str);
+      return s ? s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : "N/A";
+    }
+    function getTable(bucket){
+      const id = "#" + safeId(bucket) + "Table";
+      if(!tableInstances[bucket]){
+        tableInstances[bucket] = $(id).DataTable({
+          pageLength: 10,
+          lengthMenu: [10, 25, 50, 100],
+          order: [[3, "desc"]],
+          columnDefs: [{ targets: [6], orderable: false, searchable: false }],
+          autoWidth: false,
+          destroy: true,
+          language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_",
+            info: "Mostrando _START_ a _END_ de _TOTAL_",
+            infoEmpty: "Sin datos",
+            zeroRecords: "No hay coincidencias",
+            paginate: { previous: "‹", next: "›" }
+          }
+        });
+      }
+      return tableInstances[bucket];
+    }
+
+    function initMap(){
+      const mapOptions = {
+        center: { lat: 25.6866, lng: -100.3161 },
+        zoom: 12,
+        styles: [
+          { featureType: "water", elementType: "geometry", stylers: [{ color: "#bfe8ff" }] },
+          { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#eaf6ef" }] },
+          { featureType: "road", elementType: "geometry", stylers: [{ color: "#d7efe6" }] },
+          { featureType: "poi", elementType: "geometry", stylers: [{ color: "#dfe9d0" }] },
+          { elementType: "labels.text.fill", stylers: [{ color: "#344a4f" }] },
+          { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] }
+        ]
+      };
+      map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    }
+
+    function openModernPopup(bucket, job, marker){
+      const b = capitalizeWords(bucket);
+      const num = cleanVal(job.num) || "N/A";
+      const eq = capitalizeWords(job.equipo);
+      const com = capitalizeWords(job.comentario);
+      const fh = cleanVal(job.fecha_hora) || "N/A";
+
+      const html = `
+        <div class="iw-card">
+          <div class="iw-top">
+            <p class="iw-title">${b}</p>
+            <p class="iw-sub">Registro #${num}</p>
+          </div>
+          <div class="iw-body">
+            <div class="iw-row"><span class="iw-k">Equipo</span><span class="iw-v">${eq}</span></div>
+            <div class="iw-row"><span class="iw-k">Comentario</span><span class="iw-v">${com}</span></div>
+            <div class="iw-row"><span class="iw-k">Fecha y hora</span><span class="iw-v">${fh}</span></div>
+            <span class="iw-badge">Lat: ${cleanVal(job.latitud)} · Lng: ${cleanVal(job.longitud)}</span>
+          </div>
+        </div>
+      `;
+      infoWindow.setContent(html);
+      infoWindow.open(map, marker);
+    }
+
+    function populateTableAndMap(db, bucket, iconUrl){
+      const bucketRef = db.ref(bucket);
+      const table = getTable(bucket);
+
+      bucketRef.on("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        table.clear();
+
+        // limpia markers existentes
+        if(bucketMarkers[bucket]){
+          bucketMarkers[bucket].forEach(m => m.setMap(null));
+        }
+        bucketMarkers[bucket] = [];
+        markerIndex[bucket] = {};
+
+        const keys = Object.keys(data);
+
+        // contador TOTAL por bucket (sin filtros)
+        setTabCount(bucket, keys.length);
+
+        // ordena por fecha desc si existe
+        const items = keys.map(k => ({ key: k, job: data[k] || {} }));
+        items.sort((a,b)=>{
+          const da = parseFechaToDate(getFecha(a.job)) || new Date(0);
+          const dbb = parseFechaToDate(getFecha(b.job)) || new Date(0);
+          return dbb - da;
+        });
+
+        let shown = 0;
+
+        items.forEach(({key, job}) => {
+          const fechaRaw = getFecha(job);
+          const fechaDate = parseFechaToDate(fechaRaw);
+
+          // filtro por rango (si está activo)
+          if((filterFrom || filterTo) && !inRange(fechaDate)) return;
+
+          const num = cleanVal(job.num) || "N/A";
+          const equipo = capitalizeWords(job.equipo || "N/A");
+          const comentario = capitalizeWords(job.comentario || "N/A");
+          const fecha_hora = cleanVal(fechaRaw) || "N/A";
+
+          // botón ir al punto
+          const goBtn = `<button class="go-btn" data-bucket="${bucket}" data-key="${key}">Ir</button>`;
+
+          table.row.add([ num, equipo, comentario, fecha_hora, cleanVal(job.latitud), 
+  cleanVal(job.longitud),  goBtn ]);
+          shown++;
+
+          // mapa
+          const lat = parseFloat(cleanVal(job.latitud));
+          const lng = parseFloat(cleanVal(job.longitud));
+          if(Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0){
+            const marker = new google.maps.Marker({
+              position: { lat, lng },
+              map,
+              title: `${bucket} - ${comentario}`,
+              icon: iconUrl ? { url: iconUrl, scaledSize: new google.maps.Size(34, 34) } : undefined
+            });
+
+            // indexado por key
+            markerIndex[bucket][key] = marker;
+            bucketMarkers[bucket].push(marker);
+
+            // actualiza último punto GLOBAL (comparando fechas)
+            if(fechaDate){
+              if(!lastPointGlobal.fecha || (parseFechaToDate(lastPointGlobal.fecha) < fechaDate)){
+                lastPointGlobal = { bucket, fecha: fecha_hora, key, job };
+                setLastPointUI();
+              }
+            }
+
+            marker.addListener("click", () => {
+              openModernPopup(bucket, { ...job, fecha_hora: fecha_hora }, marker);
+              // highlight visual en tabla (si está visible)
+              highlightRowByKey(bucket, key);
+            });
+          }
+        });
+
+        table.draw(false);
+
+        // si este bucket es el activo, muestra conteo filtrado
+        if(bucket === activeBucket){
+          setShownCount(shown);
+        }
+      });
+    }
+
+    
+    function getActiveBucketFromUI(){
+      const active = document.querySelector('#bucketTabs .nav-link.active');
+      if(!active) return activeBucket;
+      const href = active.getAttribute('href') || '';
+      const id = href.replace('#','');
+      // id es dig1/dig2_pte...
+      const mapIdToBucket = {
+        'dig1':'DIG1','dig2_pte':'DIG2_PTE','dig3':'DIG3','dig4':'DIG4','dig5':'DIG5','dig6':'DIG6'
+      };
+      return mapIdToBucket[id] || activeBucket;
+    }
+
+    function highlightRowByKey(bucket, key){
+      const table = tableInstances[bucket];
+      if(!table) return;
+      const tbody = table.table().body();
+      // limpia anteriores
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr => tr.classList.remove('row-active'));
+      // busca botón con key
+      const btn = tbody.querySelector(`button.go-btn[data-bucket="${bucket}"][data-key="${key}"]`);
+      if(btn){
+        const tr = btn.closest('tr');
+        if(tr) tr.classList.add('row-active');
+      }
+    }
+
+    function focusMarker(bucket, key){
+      const marker = markerIndex[bucket]?.[key];
+      if(!marker) return;
+
+      map.panTo(marker.getPosition());
+      map.setZoom(Math.max(map.getZoom(), 16));
+      // bounce corto
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(()=> marker.setAnimation(null), 900);
+
+      // abre popup con datos si se puede (no siempre tenemos el job aquí)
+      // se abrirá si el marker fue creado y tiene listener click
+      google.maps.event.trigger(marker, 'click');
+    }
+
+    function applyFilter(){
+      const fromVal = document.getElementById('filterFrom')?.value;
+      const toVal = document.getElementById('filterTo')?.value;
+
+      filterFrom = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+      filterTo = toVal ? new Date(toVal + 'T23:59:59') : null;
+
+      // fuerza refresh: re-escuchas ya existen; solo refrescamos el conteo visible con redraw
+      // (Data viene de Firebase "value", pero para aplicar filtro necesitamos re-procesar.
+      // Solución simple: disparar un 'once' manual para cada bucket.)
+      const db = firebase.database();
+      ["DIG1","DIG2_PTE","DIG3","DIG4","DIG5","DIG6"].forEach(b=>{
+        db.ref(b).once('value').then(snap=>{
+          // simulamos trigger reusando la misma lógica: llamamos populateTableAndMap? ya está instalado.
+          // Para no duplicar listeners, solo ejecutamos el cuerpo manual con un helper:
+          // (usamos el listener existente: forzamos set con value no posible). 
+          // Entonces: recarga la página de datos re-renderizando con un callback interno: fácil = emitir un custom event.
+        });
+      });
+
+      // workaround confiable: refresco suave de la UI re-leyendo el bucket activo en vivo usando el listener existente:
+      activeBucket = getActiveBucketFromUI();
+      // el shownCount se actualizará en el siguiente evento "value" (normalmente inmediato). 
+      // Para garantizar, hacemos once() y re-llamamos render helper:
+      forceRenderActiveBucket();
+    }
+
+    function clearFilter(){
+      document.getElementById('filterFrom').value = "";
+      document.getElementById('filterTo').value = "";
+      filterFrom = null; filterTo = null;
+      activeBucket = getActiveBucketFromUI();
+      forceRenderActiveBucket();
+    }
+
+    function forceRenderActiveBucket(){
+      const db = firebase.database();
+      const bucket = activeBucket;
+      const iconMap = {
+        "DIG1":"pole80_yellow.png",
+        "DIG2_PTE":"pole80_red.png",
+        "DIG3":"pole80_blue.png",
+        "DIG4":"pole80_green.png",
+        "DIG5":"pole80_blue.png",
+        "DIG6":"pole80_green.png"
+      };
+      // reutiliza lógica: leer snapshot y ejecutar el cuerpo "value" sin duplicar listeners
+      db.ref(bucket).once('value').then(snap=>{
+        // Temporariamente llamamos a un renderer interno replicando populateTableAndMap.
+        // Para mantener el archivo simple, dispararemos un evento que el listener de Firebase ya disparará en breve
+        // si hubo cualquier cambio; pero como queremos inmediato: hacemos un "fake update" de UI con los datos.
+        const data = snap.val() || {};
+        const table = getTable(bucket);
+        table.clear();
+
+        if(bucketMarkers[bucket]){
+          bucketMarkers[bucket].forEach(m => m.setMap(null));
+        }
+        bucketMarkers[bucket] = [];
+        markerIndex[bucket] = {};
+
+        const keys = Object.keys(data);
+        setTabCount(bucket, keys.length);
+
+        const items = keys.map(k => ({ key: k, job: data[k] || {} }));
+        items.sort((a,b)=>{
+          const da = parseFechaToDate(getFecha(a.job)) || new Date(0);
+          const dbb = parseFechaToDate(getFecha(b.job)) || new Date(0);
+          return dbb - da;
+        });
+
+        let shown = 0;
+        items.forEach(({key, job})=>{
+          const fechaRaw = getFecha(job);
+          const fechaDate = parseFechaToDate(fechaRaw);
+          if((filterFrom || filterTo) && !inRange(fechaDate)) return;
+
+          const num = cleanVal(job.num) || "N/A";
+          const equipo = capitalizeWords(job.equipo || "N/A");
+          const comentario = capitalizeWords(job.comentario || "N/A");
+          const fecha_hora = cleanVal(fechaRaw) || "N/A";
+          const goBtn = `<button class="go-btn" data-bucket="${bucket}" data-key="${key}">Ir</button>`;
+          table.row.add([ num, equipo, comentario, fecha_hora, cleanVal(job.latitud), 
+  cleanVal(job.longitud),  goBtn ]);
+          shown++;
+
+          const lat = parseFloat(cleanVal(job.latitud));
+          const lng = parseFloat(cleanVal(job.longitud));
+          if(Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0){
+            const marker = new google.maps.Marker({
+              position: { lat, lng },
+              map,
+              title: `${bucket} - ${comentario}`,
+              icon: iconMap[bucket] ? { url: iconMap[bucket], scaledSize: new google.maps.Size(34, 34) } : undefined
+            });
+            markerIndex[bucket][key] = marker;
+            bucketMarkers[bucket].push(marker);
+            marker.addListener("click", () => {
+              openModernPopup(bucket, { ...job, fecha_hora: fecha_hora }, marker);
+              highlightRowByKey(bucket, key);
+            });
+          }
+        });
+        table.draw(false);
+        setShownCount(shown);
+      });
+    }
+
+    // Delegación de eventos (tablas)
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest && e.target.closest('button.go-btn');
+      if(btn){
+        const bucket = btn.getAttribute('data-bucket');
+        const key = btn.getAttribute('data-key');
+        activeBucket = bucket;
+        focusMarker(bucket, key);
+        highlightRowByKey(bucket, key);
+      }
+    });
+
+    // activar bucket al cambiar de tab
+    $(document).on('shown.bs.tab', 'a[data-toggle="pill"]', function(){
+      const b = getActiveBucketFromUI();
+      activeBucket = b;
+      // actualiza conteo mostrado según filtro
+      forceRenderActiveBucket();
+    });
+function exportActiveBucketCSV(){
+  const bucket = activeBucket || getActiveBucketFromUI();
+  const table = tableInstances[bucket];
+  if(!table){
+    alert("No hay tabla lista para exportar.");
+    return;
+  }
+
+  // toma filas VISIBLES (respeta búsqueda/filtro de DataTables)
+  const rows = table.rows({ search: "applied" }).data().toArray();
+
+  // encabezados tal como tu tabla
+  const headers = ["No.","Equipo","Comentario","Fecha y hora","Latitud","Longitud"];
+
+  // arma CSV
+  let csv = headers.join(",") + "\n";
+
+  rows.forEach(r=>{
+    // r: [0..6] (Mapa es r[6], no lo incluimos)
+    const line = [
+      r[0], r[1], r[2], r[3], r[4], r[5]
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
+    csv += line + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+
+  // nombre con fecha
+  const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  a.download = `${bucket}_${stamp}.csv`;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+
+window.onload = function(){
+      // Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyAEEmpYZpG_YElJNXRPRYrLcnBHD6kQACk",
+        authDomain: "ecnv1-a8573.firebaseapp.com",
+        databaseURL: "https://ecnv1-a8573.firebaseio.com",
+        projectId: "ecnv1-a8573",
+        storageBucket: "ecnv1-a8573.firebasestorage.app",
+        messagingSenderId: "202608859524",
+        appId: "1:202608859524:web:0052c944b501fca68e65d1",
+        measurementId: "G-E2CGH3ESV8"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      initMap();
+
+      // UI filtros
+      document.getElementById("btnApplyFilter").addEventListener("click", applyFilter);
+      document.getElementById("btnClearFilter").addEventListener("click", clearFilter);
+      activeBucket = getActiveBucketFromUI();
+      setLastPointUI();
+
+      // Buckets (6)
+      populateTableAndMap(db, "DIG1", "pole80_yellow.png");
+      populateTableAndMap(db, "DIG2_PTE", "pole80_red.png");
+      populateTableAndMap(db, "DIG3", "pole80_blue.png");
+      populateTableAndMap(db, "DIG4", "pole80_green.png");
+
+      // Si no tienes íconos para DIG5/DIG6 aún, deja el tercero como placeholder.
+      populateTableAndMap(db, "DIG5", "pole80_blue.png");
+      populateTableAndMap(db, "DIG6", "pole80_green.png");
+
+      // primer render del bucket activo
+      setTimeout(()=>{ activeBucket = getActiveBucketFromUI(); forceRenderActiveBucket(); }, 600);
+
+      document.getElementById("btnExportCSV").addEventListener("click", exportActiveBucketCSV);
+
+
+
+    };
+  </script>
+</body>
+</html>
