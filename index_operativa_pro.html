@@ -388,6 +388,7 @@
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig4" role="tab">DIG4 <span class="tab-count" id="count-dig4">0</span></a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig5" role="tab">DIG5 <span class="tab-count" id="count-dig5">0</span></a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig6" role="tab">DIG6 <span class="tab-count" id="count-dig6">0</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#dig7" role="tab">DIG7 <span class="tab-count" id="count-dig7">0</span></a></li>
         </ul>
       
       <div class="filters-wrap">
@@ -471,6 +472,13 @@
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
+            <div class="tab-pane fade" id="dig7" role="tabpanel">
+              <table id="dig7Table" class="table table-borderless table-hover w-100">
+                <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
+    <th>Longitud</th><th>Mapa</th></tr></thead>
+              </table>
+            </div>
+
           </div>
         </div>
       </div>
@@ -721,7 +729,7 @@
       const id = href.replace('#','');
       // id es dig1/dig2_pte...
       const mapIdToBucket = {
-        'dig1':'DIG1','dig2_pte':'DIG2_PTE','dig3':'DIG3','dig4':'DIG4','dig5':'DIG5','dig6':'DIG6'
+        'dig1':'DIG1','dig2_pte':'DIG2_PTE','dig3':'DIG3','dig4':'DIG4','dig5':'DIG5','dig6':'DIG6', 'dig7':'DIG7'
       };
       return mapIdToBucket[id] || activeBucket;
     }
@@ -766,7 +774,7 @@
       // (Data viene de Firebase "value", pero para aplicar filtro necesitamos re-procesar.
       // Solución simple: disparar un 'once' manual para cada bucket.)
       const db = firebase.database();
-      ["DIG1","DIG2_PTE","DIG3","DIG4","DIG5","DIG6"].forEach(b=>{
+      ["DIG1","DIG2_PTE","DIG3","DIG4","DIG5","DIG6","DIG7"].forEach(b=>{
         db.ref(b).once('value').then(snap=>{
           // simulamos trigger reusando la misma lógica: llamamos populateTableAndMap? ya está instalado.
           // Para no duplicar listeners, solo ejecutamos el cuerpo manual con un helper:
@@ -799,7 +807,8 @@
         "DIG3":"pole80_blue.png",
         "DIG4":"pole80_green.png",
         "DIG5":"pole80_blue.png",
-        "DIG6":"pole80_green.png"
+        "DIG6":"pole80_green.png",
+        "DIG7":"pole80_dark_green.png"
       };
       // reutiliza lógica: leer snapshot y ejecutar el cuerpo "value" sin duplicar listeners
       db.ref(bucket).once('value').then(snap=>{
@@ -957,6 +966,8 @@ window.onload = function(){
       // Si no tienes íconos para DIG5/DIG6 aún, deja el tercero como placeholder.
       populateTableAndMap(db, "DIG5", "pole80_blue.png");
       populateTableAndMap(db, "DIG6", "pole80_green.png");
+      populateTableAndMap(db, "DIG7", "pole80_dark_green.png");
+
 
       // primer render del bucket activo
       setTimeout(()=>{ activeBucket = getActiveBucketFromUI(); forceRenderActiveBucket(); }, 600);
