@@ -356,6 +356,51 @@
       outline-offset: -2px;
       background: rgba(13,110,253,.06) !important;
     }
+
+    /* ===== Mobile responsive tables ===== */
+.table-scroll{
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 14px;
+}
+
+/* Evita que DataTables comprima columnas en móvil */
+table.dataTable{
+  width: 100% !important;
+  min-width: 980px; /* fuerza scroll horizontal en móvil */
+}
+
+/* Botón Ir siempre visible y “tocable” */
+.go-btn{
+  min-width: 64px;
+  padding: .45rem .75rem;
+  font-size: .9rem;
+}
+
+/* Reduce paddings en móvil */
+@media (max-width: 576px){
+  .map-container{ height: 300px; }
+  .tables-wrap{ padding: 10px 10px 16px; }
+  .table-card{ padding: 10px 10px 8px; }
+  table.dataTable thead th,
+  table.dataTable tbody td{
+    padding: 10px 10px !important;
+    font-size: 12px;
+    white-space: nowrap; /* clave para que no se “rompa” el layout */
+  }
+
+  /* filtros: apilar */
+  .filters-card{
+    flex-direction: column;
+    gap: 10px;
+  }
+  .filters-left{ min-width: 0; }
+  .filters-right{ justify-content: flex-start; }
+}
+
+
+    
 </style>
 </head>
 
@@ -432,53 +477,61 @@
         <div class="table-card">
           <div class="tab-content">
             <div class="tab-pane fade show active" id="dig1" role="tabpanel">
+              <div class="table-scroll">
               <table id="dig1Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+          </div>
             <div class="tab-pane fade" id="dig2_pte" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig2_pteTable" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+           </div>
             <div class="tab-pane fade" id="dig3" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig3Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+          </div>
             <div class="tab-pane fade" id="dig4" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig4Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+           </div>
             <div class="tab-pane fade" id="dig5" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig5Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+          </div>
             <div class="tab-pane fade" id="dig6" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig6Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
+          </div>    
             <div class="tab-pane fade" id="dig7" role="tabpanel">
+               <div class="table-scroll">
               <table id="dig7Table" class="table table-borderless table-hover w-100">
                 <thead><tr><th>No.</th><th>Equipo</th><th>Comentario</th><th>Fecha y hora</th><th>Latitud</th>
     <th>Longitud</th><th>Mapa</th></tr></thead>
               </table>
             </div>
-
+           </div>
           </div>
         </div>
       </div>
